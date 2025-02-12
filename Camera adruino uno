@@ -1,0 +1,36 @@
+#include <Wire.h>
+#include <ArduCAM.h>
+#include <SPI.h>
+
+#define CS_PIN 10  // Broche CS pour la communication SPI avec la caméra
+
+ArduCAM myCAM(OV7670, CS_PIN);
+
+void setup() {
+  Serial.begin(115200);
+  Wire.begin();
+  
+  pinMode(CS_PIN, OUTPUT);
+  digitalWrite(CS_PIN, HIGH);
+
+  // Initialisation de la caméra OV7670
+  myCAM.write_reg(0x12, 0x80);  // Reset de la caméra
+  delay(100);
+  
+  Serial.println("Initialisation de la caméra OV7670...");
+}
+
+void loop() {
+  Serial.println("Capture d'image...");
+  
+  // Capture une image et stocke les données
+  myCAM.flush_fifo();
+  myCAM.clear_fifo_flag();
+  myCAM.start_capture();
+  
+  while (!myCAM.get_bit(ARDUCHIP_TRIG, CAP_DONE_MASK));
+
+  Serial.println("Image capturée !");
+  
+  delay(1000); // Pause entre chaque capture
+}
